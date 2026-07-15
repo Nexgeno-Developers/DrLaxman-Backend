@@ -156,6 +156,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Home',
                 'description' => 'Homepage layout for the website.',
             ],
+            'conditions' => [
+                'label' => 'Conditions',
+                'description' => 'Layout for the "Conditions" page, showcasing medical condition details and related pages.',
+            ],
 
         ];
 
