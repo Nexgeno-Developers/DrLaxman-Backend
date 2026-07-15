@@ -78,6 +78,7 @@ class PageController extends Controller
         'premium_products',
         'products',
         'conditions',
+        'centres',
         'relation_category',
         'relation_industries',
         'page_blocks',        

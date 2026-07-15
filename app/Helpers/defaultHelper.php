@@ -164,6 +164,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Centre Detail',
                 'description' => 'Layout for the centre detail page with location, insurance, and related conditions sections.',
             ],
+            'centres' => [
+                'label' => 'Centres',
+                'description' => 'Layout for the centres listing page with ordered centre references.',
+            ],
 
         ];
 
@@ -918,6 +922,21 @@ if (!function_exists('page_details_from_ids')) {
             ->toArray();
 
         if (empty($pages)) return $returnSingleWhenOne ? null : [];
+
+        $pagesById = [];
+        foreach ($pages as $page) {
+            $pagesById[(int) $page['id']] = $page;
+        }
+
+        $orderedPages = [];
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if (isset($pagesById[$id])) {
+                $orderedPages[] = $pagesById[$id];
+            }
+        }
+
+        $pages = $orderedPages;
 
         // Get page IDs for meta lookup
         $pageIds = array_column($pages, 'id');
