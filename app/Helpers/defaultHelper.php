@@ -160,6 +160,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Conditions',
                 'description' => 'Layout for the "Conditions" page, showcasing medical condition details and related pages.',
             ],
+            'centre_detail' => [
+                'label' => 'Centre Detail',
+                'description' => 'Layout for the centre detail page with location, insurance, and related conditions sections.',
+            ],
 
         ];
 

@@ -76,7 +76,11 @@ class PageController extends Controller
      */
     public function create()
     {
-        return view('backend.' . $this->folderName . '.create');
+        $pageData = new Page();
+        $pageData->layout = 'default';
+        $pageData->setRelation('meta', collect());
+
+        return view('backend.' . $this->folderName . '.create', compact('pageData'));
     }
 
     /**
@@ -84,6 +88,8 @@ class PageController extends Controller
      */
     public function store(Request $request)
     {
+        $layout = $request->input('layout', 'default');
+
         // Validate form data
         $request->validate([
             'title' => 'required|string|min:3|max:255',
@@ -101,7 +107,7 @@ class PageController extends Controller
                     }
                 },
             ],            
-            'content' => 'required|string', 
+            'content' => $layout === 'default' ? 'required|string' : 'nullable|string',
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:500',
             'seo_schema' => 'nullable|string',
@@ -114,13 +120,26 @@ class PageController extends Controller
                 'title' => $request->title,
                 'slug' => strtolower(str_replace(' ', '-', $request->slug)),
                 'content' => $request->content,
-                'layout' => $request->layout ?? 'default',
+                'layout' => $layout,
                 'seo_title' => $request->seo_title,
                 'seo_description' => $request->seo_description,
                 'seo_schema' => $request->seo_schema,
                 'is_active' => $request->is_active,
                 'company_id' => $request->company_id,
             ]);
+
+            foreach ($request->input('meta', []) as $key => $value) {
+                $value = is_array($value) ? json_encode($value) : $value;
+
+                if ($value === null || $value === '') {
+                    continue;
+                }
+
+                $team->meta()->create([
+                    'meta_key' => $key,
+                    'meta_value' => $value,
+                ]);
+            }
 
             ApiPayloadCache::invalidatePage((int) $team->id, true);
     
@@ -153,14 +172,20 @@ class PageController extends Controller
     /**
      * Return the layout-specific fields HTML for the edit form.
      */
-    public function layoutFields(Request $request, $id)
+    public function layoutFields(Request $request, $id = null)
     {
-        $pageData = Page::findOrFail($id);
-        $layout = $request->get('layout', $pageData->layout);
+        $layout = $request->get('layout', 'default');
 
         // Ensure layout is one of the allowed layouts to avoid arbitrary view loading
         if (!array_key_exists($layout, getPageLayouts())) {
             abort(400, 'Invalid layout');
+        }
+
+        if ($id) {
+            $pageData = Page::with('meta')->findOrFail($id);
+        } else {
+            $pageData = new Page();
+            $pageData->setRelation('meta', collect());
         }
 
         $pageData->layout = $layout;
