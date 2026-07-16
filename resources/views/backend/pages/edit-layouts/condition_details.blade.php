@@ -25,7 +25,13 @@
 
             if (array_is_list($decoded)) {
                 return collect($decoded)
-                    ->map(fn ($item) => trim((string) $item))
+                    ->map(function ($item) {
+                        if (is_array($item)) {
+                            return trim((string) ($item['value'] ?? $item['description'] ?? $item['title'] ?? ''));
+                        }
+
+                        return trim((string) $item);
+                    })
                     ->filter()
                     ->values()
                     ->all();
