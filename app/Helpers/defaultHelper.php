@@ -172,6 +172,14 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Treatment Details',
                 'description' => 'Layout for treatment detail pages with benefits, journey, and FAQs sections.',
             ],
+            'mission_vision' => [
+                'label' => 'Mission & Vision',
+                'description' => 'Layout for mission and vision content with repeatable description points.',
+            ],
+            'teams' => [
+                'label' => 'Teams',
+                'description' => 'Layout for team listing pages with repeatable profile cards.',
+            ],
 
         ];
 
