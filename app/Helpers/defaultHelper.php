@@ -168,6 +168,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Centres',
                 'description' => 'Layout for the centres listing page with ordered centre references.',
             ],
+            'treatments' => [
+                'label' => 'Treatments',
+                'description' => 'Layout for treatment detail pages with benefits, journey, and FAQs sections.',
+            ],
 
         ];
 
