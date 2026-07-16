@@ -14,11 +14,11 @@ class MenuSeeder extends Seeder
     {
         // Seed menu groups
         $menuGroups = [
-            ['name' => 'Top Navigation', 'slug' => 'top-navigation', 'description' => 'Main top navigation menu', 'status' => true],
-            ['name' => 'Quick Link', 'slug' => 'quick-link', 'description' => 'Quick links menu', 'status' => true],
-            ['name' => 'Legal', 'slug' => 'legal', 'description' => 'Legal menu', 'status' => true],
-            ['name' => 'Connect', 'slug' => 'connect', 'description' => 'Connect menu', 'status' => true],
-            ['name' => 'Contact', 'slug' => 'contact', 'description' => 'Contact menu', 'status' => true],
+            ['name' => 'Header Navigation', 'slug' => 'header-navigation', 'description' => 'Header navigation menu', 'status' => true],
+            ['name' => 'Footer Conditions', 'slug' => 'footer-conditions', 'description' => 'Footer conditions menu', 'status' => true],
+            ['name' => 'Footer Treatments', 'slug' => 'footer-treatments', 'description' => 'Footer treatments menu', 'status' => true],
+            ['name' => 'Footer Centres', 'slug' => 'footer-centres', 'description' => 'Footer centres menu', 'status' => true],
+            ['name' => 'Footer Resources', 'slug' => 'footer-resources', 'description' => 'Footer resources menu', 'status' => true],
         ];
 
         foreach ($menuGroups as $groupData) {

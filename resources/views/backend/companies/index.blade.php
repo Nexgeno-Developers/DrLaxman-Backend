@@ -25,7 +25,7 @@
                                 <th>Name</th>
                                 <th>Website</th>
                                 <th>Email</th>
-                                <th>Phone</th>
+                                <th>Primary Contact</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>

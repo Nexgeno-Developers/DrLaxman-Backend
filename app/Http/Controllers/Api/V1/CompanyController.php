@@ -86,21 +86,25 @@ class CompanyController extends Controller
     private function companyPayload(Company $company): array
     {
         $logo = uploaded_asset_details_from_ids($company->logo);
-        $footerLogo = uploaded_asset_details_from_ids($company->footer_logo_image);
-        $googleMap = uploaded_asset_details_from_ids($company->google_map);
+        $secondaryContact = $company->meta->firstWhere('meta_key', 'secondary_contact')?->meta_value;
+        $stripText = $company->meta->firstWhere('meta_key', 'strip_text')?->meta_value;
+        $medicalPrivacyDisclaimer = $company->meta->firstWhere('meta_key', 'medical_privacy_disclaimer')?->meta_value;
 
         return [
             'id' => $company->id,
             'name' => $company->name,
             'logo' => $logo,
-            'footer_logo_image' => $footerLogo,
             'email' => $company->email,
             'phone' => $company->phone,
+            'primary_contact' => $company->phone,
+            'secondary_contact' => $secondaryContact,
             'whatsapp' => $company->whatsapp,
-            'address' => $company->address,
+            'whatsapp_contact' => $company->whatsapp,
             'website' => $company->website,
-            'google_map' => $googleMap,
             'short_description' => $company->short_description,
+            'about' => $company->short_description,
+            'medical_privacy_disclaimer' => $medicalPrivacyDisclaimer,
+            'strip_text' => $stripText,
             'meta_title' => $company->meta_title,
             'meta_description' => $company->meta_description,
             'is_active' => (bool) $company->is_active,

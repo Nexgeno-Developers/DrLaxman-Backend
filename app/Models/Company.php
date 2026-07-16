@@ -7,9 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     protected $fillable = [
-        'name', 'logo', 'email', 'phone', 'whatsapp',
-        'address', 'website', 'google_map', 'is_active',
-        'footer_logo_image', 'short_description',
+        'name',
+        'logo',
+        'email',
+        'phone',
+        'whatsapp',
+        'website',
+        'short_description',
+        'meta_title',
+        'meta_description',
+        'is_active',
     ];
 
     public function meta()

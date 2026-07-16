@@ -57,13 +57,11 @@ class CompanyController extends Controller
             $company = Company::create([
                 'name' => $request->input('name'),
                 'logo' => $request->input('logo'),
-                'footer_logo_image' => $request->input('footer_logo_image'),
                 'short_description' => $request->input('short_description'),
                 'email' => $request->input('email'),
                 'phone' => $request->input('phone'),
-                'address' => $request->input('address'),
+                'whatsapp' => $request->input('whatsapp'),
                 'website' => $request->input('website'),
-                'google_map' => $request->input('google_map'),
                 'meta_title' => $request->input('meta_title'),
                 'meta_description' => $request->input('meta_description'),
                 'is_active' => $request->input('is_active', 1),
@@ -130,19 +128,30 @@ class CompanyController extends Controller
             // Use input defaults to avoid wiping existing values if a field isn't sent.
             $company->name = $request->input('name', $company->name);
             $company->logo = $request->input('logo', $company->logo);
-            $company->footer_logo_image = $request->input('footer_logo_image', $company->footer_logo_image);
             $company->short_description = $request->input('short_description', $company->short_description);
             $company->email = $request->input('email', $company->email);
             $company->phone = $request->input('phone', $company->phone);
-            $company->address = $request->input('address', $company->address);
+            $company->whatsapp = $request->input('whatsapp', $company->whatsapp);
             $company->website = $request->input('website', $company->website);
-            $company->google_map = $request->input('google_map', $company->google_map);
             $company->meta_title = $request->input('meta_title', $company->meta_title);
             $company->meta_description = $request->input('meta_description', $company->meta_description);
             $company->save();
         
             // Handle meta fields
             $metaFields = $request->input('meta', []); // Get all meta fields from the request
+
+            $obsoleteMetaKeys = [
+                'breadcrumb',
+                'sales_partner_email',
+                'technical_support_email',
+                'careers_email',
+                'x_url',
+                'youtube_url',
+                'tiktok_url',
+                'vimeo_url',
+            ];
+
+            $company->meta()->whereIn('meta_key', $obsoleteMetaKeys)->delete();
 
             foreach ($metaFields as $key => $value) {
                 // Check if the meta key exists for the current company

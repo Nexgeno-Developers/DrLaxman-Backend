@@ -174,6 +174,16 @@ class PageController extends Controller
             $additionalParams = explode(',', $additionalParams);
             
             foreach($additionalParams as $param):
+                if($param === 'all_centre_detail') {
+                    $ids = Page::query()
+                        ->where('layout', 'centre_detail')
+                        ->where('is_active', true)
+                        ->pluck('id')
+                        ->toArray();
+
+                    $autofetchSections['all_centre_detail'] = page_details_from_ids($ids, false);
+                }
+
                 // if($param === 'services') {
                 //     $ids = Page::query()->whereIn('layout', ['marketing_services', 'technical_services'])->where('is_active', true)->pluck('id')->toArray();
                 //     $autofetchSections['services'] = page_details_from_ids($ids);
