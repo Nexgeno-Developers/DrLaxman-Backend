@@ -9,10 +9,44 @@
         return is_array($data) ? $data : [];
     };
 
+    $normalizeTagValues = function ($value) {
+        $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+        if (is_array($decoded)) {
+            if (isset($decoded['value']) && is_array($decoded['value'])) {
+                return collect($decoded['value'])
+                    ->map(function ($item) {
+                        if (is_array($item)) {
+                            return trim((string) ($item['value'] ?? $item['description'] ?? $item['title'] ?? ''));
+                        }
+
+                        return trim((string) $item);
+                    })
+                    ->filter()
+                    ->implode(',');
+            }
+
+            if (array_is_list($decoded)) {
+                return collect($decoded)
+                    ->map(function ($item) {
+                        if (is_array($item)) {
+                            return trim((string) ($item['value'] ?? $item['description'] ?? $item['title'] ?? ''));
+                        }
+
+                        return trim((string) $item);
+                    })
+                    ->filter()
+                    ->implode(',');
+            }
+        }
+
+        return (string) $value;
+    };
+
     $breadcrumb_title = $getMeta('breadcrumb_title');
     $breadcrumb_subtitle = $getMeta('breadcrumb_subtitle');
     $breadcrumb_description = $getMeta('breadcrumb_description');
-    $breadcrumb_key_highlights = $getMeta('breadcrumb_key_highlights');
+    $breadcrumb_key_highlights = $normalizeTagValues($getMeta('breadcrumb_key_highlights'));
     $breadcrumb_image = $getMeta('breadcrumb_image');
     $breadcrumb_image_overlay_title = $getMeta('breadcrumb_image_overlay_title');
     $breadcrumb_image_overlay_description = $getMeta('breadcrumb_image_overlay_description');
@@ -20,14 +54,14 @@
     $about_treatment_subtitle = $getMeta('about_treatment_subtitle');
     $about_treatment_title = $getMeta('about_treatment_title');
     $about_treatment_description = $getMeta('about_treatment_description');
-    $about_treatment_key_highlights = $getMeta('about_treatment_key_highlights');
+    $about_treatment_key_highlights = $normalizeTagValues($getMeta('about_treatment_key_highlights'));
     $about_treatment_image = $getMeta('about_treatment_image');
 
     $benefits_subtitle = $getMeta('benefits_subtitle');
     $benefits_title = $getMeta('benefits_title');
     $benefits_description = $getMeta('benefits_description');
     $benefits_image = $getMeta('benefits_image');
-    $benefits_key_highlights = $getMeta('benefits_key_highlights');
+    $benefits_key_highlights = $normalizeTagValues($getMeta('benefits_key_highlights'));
 
     $treatment_journey_subtitle = $getMeta('treatment_journey_subtitle');
     $treatment_journey_title = $getMeta('treatment_journey_title');
@@ -37,7 +71,7 @@
     $treatment_journey_secondary_subtitle = $getMeta('treatment_journey_secondary_subtitle');
     $treatment_journey_secondary_title = $getMeta('treatment_journey_secondary_title');
     $treatment_journey_secondary_description = $getMeta('treatment_journey_secondary_description');
-    $treatment_journey_secondary_key_highlights = $getMeta('treatment_journey_secondary_key_highlights');
+    $treatment_journey_secondary_key_highlights = $normalizeTagValues($getMeta('treatment_journey_secondary_key_highlights'));
     $treatment_journey_secondary_image = $getMeta('treatment_journey_secondary_image');
 
     $faq_subtitle = $getMeta('faq_subtitle');

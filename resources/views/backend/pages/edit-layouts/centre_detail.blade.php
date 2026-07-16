@@ -6,17 +6,34 @@
     };
 
     $normalizeTagValues = function ($value) {
-        if (is_array($value)) {
-            return collect($value)
-                ->map(function ($item) {
-                    if (is_array($item)) {
-                        return trim((string) ($item['value'] ?? ''));
-                    }
+        $decoded = is_string($value) ? json_decode($value, true) : $value;
 
-                    return trim((string) $item);
-                })
-                ->filter()
-                ->implode(',');
+        if (is_array($decoded)) {
+            if (isset($decoded['value']) && is_array($decoded['value'])) {
+                return collect($decoded['value'])
+                    ->map(function ($item) {
+                        if (is_array($item)) {
+                            return trim((string) ($item['value'] ?? $item['description'] ?? $item['title'] ?? ''));
+                        }
+
+                        return trim((string) $item);
+                    })
+                    ->filter()
+                    ->implode(',');
+            }
+
+            if (array_is_list($decoded)) {
+                return collect($decoded)
+                    ->map(function ($item) {
+                        if (is_array($item)) {
+                            return trim((string) ($item['value'] ?? $item['description'] ?? $item['title'] ?? ''));
+                        }
+
+                        return trim((string) $item);
+                    })
+                    ->filter()
+                    ->implode(',');
+            }
         }
 
         return (string) $value;
