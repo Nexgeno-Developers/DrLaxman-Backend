@@ -11,6 +11,44 @@
         return is_array($data) ? $data : [];
     };
 
+    $normalizeTextList = function ($value, $preferredKey = null) {
+        $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+        if (is_array($decoded)) {
+            if ($preferredKey !== null && isset($decoded[$preferredKey]) && is_array($decoded[$preferredKey])) {
+                return collect($decoded[$preferredKey])
+                    ->map(fn ($item) => trim((string) $item))
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+
+            if (array_is_list($decoded)) {
+                return collect($decoded)
+                    ->map(fn ($item) => trim((string) $item))
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+
+            if (isset($decoded['value']) && is_array($decoded['value'])) {
+                return collect($decoded['value'])
+                    ->map(fn ($item) => trim((string) $item))
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+        }
+
+        $value = trim((string) $value);
+
+        return $value !== '' ? [$value] : [];
+    };
+
+    $normalizeTagString = function ($value) use ($normalizeTextList) {
+        return implode(',', $normalizeTextList($value, 'value'));
+    };
+
     $normalizeTagValues = function ($value) {
         if (is_array($value)) {
             return collect($value)
@@ -31,7 +69,7 @@
     $breadcrumb_title = $getMeta('breadcrumb_title');
     $breadcrumb_subtitle = $getMeta('breadcrumb_subtitle');
     $breadcrumb_description = $getMeta('breadcrumb_description');
-    $breadcrumb_key_highlights = $getRepeater('breadcrumb_key_highlights');
+    $breadcrumb_key_highlights = $normalizeTagString($getMeta('breadcrumb_key_highlights'));
 
     $overview_title = $getMeta('overview_title');
     $overview_image = $getMeta('overview_image');
@@ -48,10 +86,10 @@
 
     $treatment_title = $getMeta('treatment_title');
     $treatment_items = $getRepeater('treatment_items');
-    $treatment_recommendation = $getMeta('treatment_recommendation');
+    $treatment_recommendation = $normalizeTextList($getMeta('treatment_recommendation'), 'description');
 
     $why_treat_title = $getMeta('why_treat_title');
-    $why_treat_description = $getMeta('why_treat_description');
+    $why_treat_description = $normalizeTextList($getMeta('why_treat_description'));
 
     $recovery_timeline_title = $getMeta('recovery_timeline_title');
     $recovery_timeline_items = $getRepeater('recovery_timeline_items');
@@ -94,97 +132,10 @@
         <textarea name="meta[breadcrumb_description]" class="form-control text-editor" rows="4" required>{{ $breadcrumb_description }}</textarea>
     </div>
 
-    <div class="col-md-12">
-        <hr>
-        <h5 class="text-primary">Key Highlights</h5>
+    <div class="col-md-6 form-group mb-2">
+        <label class="form-label">Key Highlights <span class="text-danger">*</span></label>
+        <input type="text" class="form-control aiz-tag-input" name="meta[breadcrumb_key_highlights]" value="{{ $breadcrumb_key_highlights }}" placeholder="Enter highlights separated by commas" required>
     </div>
-
-    <div class="breadcrumb-highlights-target col-md-12">
-        @if(isset($breadcrumb_key_highlights['itration']) && is_array($breadcrumb_key_highlights['itration']))
-            @foreach($breadcrumb_key_highlights['itration'] as $index => $itration)
-                <div class="row remove-parent">
-                    <div class="col-md-11">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <input value="{{ $index }}" name="meta[breadcrumb_key_highlights][itration][]" type="hidden" required>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Icon <span class="text-danger">*</span></label>
-                                <div class="form-group mb-2">
-                                    <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="false">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text bg-soft-secondary font-weight-medium">{{ __('Browse') }}</div>
-                                        </div>
-                                        <div class="form-control file-amount">{{ __('Choose File') }}</div>
-                                        <input type="hidden" name="meta[breadcrumb_key_highlights][icon][]" class="selected-files" value="{{ $breadcrumb_key_highlights['icon'][$index] ?? '' }}" required>
-                                    </div>
-                                    <div class="file-preview box sm"></div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 form-group mb-2">
-                                <label class="form-label">Value <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="meta[breadcrumb_key_highlights][value][]" value="{{ $breadcrumb_key_highlights['value'][$index] ?? '' }}" placeholder="Enter highlight value" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-1 btn-dynamic-fields">
-                        <button type="button" class="btn btn-icon btn-circle btn-soft-danger mb-1" data-toggle="remove-parent" data-parent=".remove-parent">
-                            <i class="ti ti-x"></i>
-                        </button>
-                    </div>
-                </div>
-            @endforeach
-        @endif
-    </div>
-
-    <div class="col-md-12">
-        <button
-            type="button"
-            class="mt-1 btn btn-soft-success btn-icon w-100 mb-2"
-            data-toggle="add-more"
-            data-limit="10"
-            data-content='
-                <div class="row remove-parent">
-                    <div class="col-md-11">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <input value="data" name="meta[breadcrumb_key_highlights][itration][]" type="hidden" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Icon <span class="text-danger">*</span></label>
-                                <div class="form-group mb-2">
-                                    <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="false">
-                                        <div class="input-group-prepend">
-                                            <div class="input-group-text bg-soft-secondary font-weight-medium">{{ __('Browse') }}</div>
-                                        </div>
-                                        <div class="form-control file-amount">{{ __('Choose File') }}</div>
-                                        <input type="hidden" name="meta[breadcrumb_key_highlights][icon][]" class="selected-files" required>
-                                    </div>
-                                    <div class="file-preview box sm"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 form-group mb-2">
-                                <label class="form-label">Value <span class="text-danger">*</span></label>
-                                <input type="text" name="meta[breadcrumb_key_highlights][value][]" class="form-control" placeholder="Enter highlight value" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-1 btn-dynamic-fields">
-                        <button type="button" class="btn btn-icon btn-circle btn-soft-danger mb-1" data-toggle="remove-parent" data-parent=".remove-parent">
-                            <i class="ti ti-x"></i>
-                        </button>
-                    </div>
-                </div>
-            '
-            data-target=".breadcrumb-highlights-target">
-            <i class="ti ti-plus"></i>
-            <span class="ml-2">Add More</span>
-        </button>
-    </div>
-</div>
 </div>
 
 <div class="row">
@@ -224,12 +175,12 @@
         <h4 class="text-primary">Symptoms Section</h4>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Title <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[symptoms_title]" value="{{ $symptoms_title }}" placeholder="Enter symptoms title" required>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Symptoms <span class="text-danger">*</span></label>
         <input type="text" class="form-control aiz-tag-input" name="meta[symptoms]" value="{{ $symptoms }}" placeholder="Enter symptoms separated by commas" required>
     </div>
@@ -321,12 +272,12 @@
         <h4 class="text-primary">Common Causes Section</h4>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Title <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[common_causes_title]" value="{{ $common_causes_title }}" placeholder="Enter common causes title" required>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Symptoms <span class="text-danger">*</span></label>
         <input type="text" class="form-control aiz-tag-input" name="meta[common_causes]" value="{{ $common_causes }}" placeholder="Enter causes separated by commas" required>
     </div>
@@ -338,7 +289,7 @@
         <h4 class="text-primary">Treatment Section</h4>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Title <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[treatment_title]" value="{{ $treatment_title }}" placeholder="Enter treatment title" required>
     </div>
@@ -402,9 +353,58 @@
         </button>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
-        <label class="form-label">Recommendation <span class="text-danger">*</span></label>
-        <textarea name="meta[treatment_recommendation]" class="form-control text-editor" rows="4" required>{{ $treatment_recommendation }}</textarea>
+    <div class="col-md-12">
+        <hr>
+        {{-- <h5 class="text-primary">Recommendations</h5> --}}
+    </div>
+
+    <div class="treatment-recommendation-target col-md-12">
+        @foreach($treatment_recommendation as $index => $recommendation)
+            <div class="row remove-parent">
+                <div class="col-md-11">
+                    <div class="row">
+                        <div class="col-md-12 form-group mb-2">
+                            <label class="form-label">Recommendation <span class="text-danger">*</span></label>
+                            <textarea name="meta[treatment_recommendation][description][]" class="form-control text-editor" rows="3" required>{{ $recommendation }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1 btn-dynamic-fields">
+                    <button type="button" class="btn btn-icon btn-circle btn-soft-danger mb-1" data-toggle="remove-parent" data-parent=".remove-parent">
+                        <i class="ti ti-x"></i>
+                    </button>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <div class="col-md-12">
+        <button
+            type="button"
+            class="mt-1 btn btn-soft-success btn-icon w-100 mb-2"
+            data-toggle="add-more"
+            data-limit="12"
+            data-content='
+                <div class="row remove-parent">
+                    <div class="col-md-11">
+                        <div class="row">
+                            <div class="col-md-12 form-group mb-2">
+                                <label class="form-label">Recommendation <span class="text-danger">*</span></label>
+                                <textarea name="meta[treatment_recommendation][description][]" class="form-control text-editor" rows="3" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1 btn-dynamic-fields">
+                        <button type="button" class="btn btn-icon btn-circle btn-soft-danger mb-1" data-toggle="remove-parent" data-parent=".remove-parent">
+                            <i class="ti ti-x"></i>
+                        </button>
+                    </div>
+                </div>
+            '
+            data-target=".treatment-recommendation-target">
+            <i class="ti ti-plus"></i>
+            <span class="ml-2">Add More</span>
+        </button>
     </div>
 </div>
 
@@ -414,14 +414,63 @@
         <h4 class="text-primary">Why Treat Section</h4>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Title <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[why_treat_title]" value="{{ $why_treat_title }}" placeholder="Enter why treat title" required>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
-        <label class="form-label">Description <span class="text-danger">*</span></label>
-        <textarea name="meta[why_treat_description]" class="form-control text-editor" rows="4" required>{{ $why_treat_description }}</textarea>
+    <div class="col-md-12">
+        <hr>
+        {{-- <h5 class="text-primary">Descriptions</h5> --}}
+    </div>
+
+    <div class="why-treat-description-target col-md-12">
+        @foreach($why_treat_description as $index => $description)
+            <div class="row remove-parent">
+                <div class="col-md-11">
+                    <div class="row">
+                        <div class="col-md-12 form-group mb-2">
+                            <label class="form-label">Description <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="meta[why_treat_description][]" value="{{ $description }}" placeholder="Enter description" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1 btn-dynamic-fields">
+                    <button type="button" class="btn btn-icon btn-circle btn-soft-danger mb-1" data-toggle="remove-parent" data-parent=".remove-parent">
+                        <i class="ti ti-x"></i>
+                    </button>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <div class="col-md-12">
+        <button
+            type="button"
+            class="mt-1 btn btn-soft-success btn-icon w-100 mb-2"
+            data-toggle="add-more"
+            data-limit="12"
+            data-content='
+                <div class="row remove-parent">
+                    <div class="col-md-11">
+                        <div class="row">
+                            <div class="col-md-12 form-group mb-2">
+                                <label class="form-label">Description <span class="text-danger">*</span></label>
+                                <input type="text" name="meta[why_treat_description][]" class="form-control" placeholder="Enter description" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1 btn-dynamic-fields">
+                        <button type="button" class="btn btn-icon btn-circle btn-soft-danger mb-1" data-toggle="remove-parent" data-parent=".remove-parent">
+                            <i class="ti ti-x"></i>
+                        </button>
+                    </div>
+                </div>
+            '
+            data-target=".why-treat-description-target">
+            <i class="ti ti-plus"></i>
+            <span class="ml-2">Add More</span>
+        </button>
     </div>
 </div>
 
@@ -511,19 +560,19 @@
         <h4 class="text-primary">Cost & Insurance Section</h4>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Title <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[cost_insurance_title]" value="{{ $cost_insurance_title }}" placeholder="Enter cost & insurance title" required>
+    </div>
+
+    <div class="col-md-6 form-group mb-2">
+        <label class="form-label">Check Insurance & Centres <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" name="meta[cost_insurance_centres]" value="{{ $cost_insurance_centres }}" placeholder="Enter centres or check insurance text" required>
     </div>
 
     <div class="col-md-12 form-group mb-2">
         <label class="form-label">Description <span class="text-danger">*</span></label>
         <textarea name="meta[cost_insurance_description]" class="form-control text-editor" rows="4" required>{{ $cost_insurance_description }}</textarea>
-    </div>
-
-    <div class="col-md-12 form-group mb-2">
-        <label class="form-label">Check Insurance & Centres <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" name="meta[cost_insurance_centres]" value="{{ $cost_insurance_centres }}" placeholder="Enter centres or check insurance text" required>
     </div>
 </div>
 
@@ -533,7 +582,7 @@
         <h4 class="text-primary">FAQ Section</h4>
     </div>
 
-    <div class="col-md-12 form-group mb-2">
+    <div class="col-md-6 form-group mb-2">
         <label class="form-label">Title <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[faq_title]" value="{{ $faq_title }}" placeholder="Enter FAQ title" required>
     </div>
@@ -597,7 +646,9 @@
                         <button type="button" class="btn btn-icon btn-circle btn-soft-danger mb-1" data-toggle="remove-parent" data-parent=".remove-parent">
                             <i class="ti ti-x"></i>
                         </button>
-</div>
+                    </div>
+                </div>
+            </div>
             '
             data-target=".faq-target">
             <i class="ti ti-plus"></i>
