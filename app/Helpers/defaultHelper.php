@@ -184,6 +184,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'About Me',
                 'description' => 'Layout for about me pages with credentials, story, trust, and centre highlights.',
             ],
+            'contact_us' => [
+                'label' => 'Contact Us',
+                'description' => 'Layout for contact us pages with hero content and FAQs.',
+            ],
 
         ];
 
