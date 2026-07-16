@@ -68,6 +68,7 @@ class PageController extends Controller
         'credentials_items',
         'our_story_items',
         'why_choose_items',
+        'trust_items',
         'global_scale_year_items',
         'global_scale_stat_items',
         'knowledge_center_items',

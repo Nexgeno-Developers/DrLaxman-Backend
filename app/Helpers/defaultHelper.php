@@ -156,6 +156,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Home',
                 'description' => 'Homepage layout for the website.',
             ],
+            'conditions' => [
+                'label' => 'Conditions',
+                'description' => 'Layout for the conditions listing page with auto-fetched condition cards.',
+            ],
             'condition_details' => [
                 'label' => 'Condition Details',
                 'description' => 'Layout for the condition detail page, showcasing medical condition details and related pages.',
@@ -172,6 +176,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Treatment Details',
                 'description' => 'Layout for treatment detail pages with benefits, journey, and FAQs sections.',
             ],
+            'treatments' => [
+                'label' => 'Treatments',
+                'description' => 'Layout for the treatments listing page with auto-fetched treatment cards.',
+            ],
             'mission_vision' => [
                 'label' => 'Mission & Vision',
                 'description' => 'Layout for mission and vision content with repeatable description points.',
@@ -187,6 +195,14 @@ if (!function_exists('getPageLayouts')) {
             'contact_us' => [
                 'label' => 'Contact Us',
                 'description' => 'Layout for contact us pages with hero content and FAQs.',
+            ],
+            'faqs' => [
+                'label' => 'FAQs',
+                'description' => 'Layout for frequently asked questions pages with hero content and FAQ items.',
+            ],
+            'testimonials' => [
+                'label' => 'Testimonials',
+                'description' => 'Layout for testimonial pages with review intro and trust counters.',
             ],
 
         ];
