@@ -156,9 +156,9 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Home',
                 'description' => 'Homepage layout for the website.',
             ],
-            'conditions' => [
-                'label' => 'Conditions',
-                'description' => 'Layout for the "Conditions" page, showcasing medical condition details and related pages.',
+            'condition_details' => [
+                'label' => 'Condition Details',
+                'description' => 'Layout for the condition detail page, showcasing medical condition details and related pages.',
             ],
             'centre_detail' => [
                 'label' => 'Centre Detail',
@@ -168,8 +168,8 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Centres',
                 'description' => 'Layout for the centres listing page with ordered centre references.',
             ],
-            'treatments' => [
-                'label' => 'Treatments',
+            'treatment_details' => [
+                'label' => 'Treatment Details',
                 'description' => 'Layout for treatment detail pages with benefits, journey, and FAQs sections.',
             ],
 
@@ -946,7 +946,17 @@ if (!function_exists('page_details_from_ids')) {
         $pageIds = array_column($pages, 'id');
 
         // Fetch all relevant meta in one query
-        $metaKeys = ['short_summary_icon', 'short_summary_image', 'short_summary_title', 'short_summary_description', 'short_summary_video_url'];
+        $metaKeys = [
+            'short_summary_icon',
+            'short_summary_image',
+            'short_summary_title',
+            'short_summary_description',
+            'short_summary_video_url',
+            'breadcrumb_description',
+            'breadcrumb_image',
+            'address_map_iframe',
+            'address_address',
+        ];
         $pageMetas = PageMeta::whereIn('page_id', $pageIds)
             ->whereIn('meta_key', $metaKeys)
             ->get()
@@ -977,6 +987,22 @@ if (!function_exists('page_details_from_ids')) {
 
             if (!empty($metaMap['short_summary_description'])) {
                 $page['short_summary_description'] = $metaMap['short_summary_description'];
+            }
+
+            if (!empty($metaMap['breadcrumb_description'])) {
+                $page['breadcrumb_description'] = $metaMap['breadcrumb_description'];
+            }
+
+            if (!empty($metaMap['breadcrumb_image'])) {
+                $page['breadcrumb_image'] = uploaded_asset_details_from_ids($metaMap['breadcrumb_image']);
+            }
+
+            if (!empty($metaMap['address_map_iframe'])) {
+                $page['address_map_iframe'] = $metaMap['address_map_iframe'];
+            }
+
+            if (!empty($metaMap['address_address'])) {
+                $page['address_address'] = $metaMap['address_address'];
             }
         }
 

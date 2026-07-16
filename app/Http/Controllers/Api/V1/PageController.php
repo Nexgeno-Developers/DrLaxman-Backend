@@ -164,194 +164,194 @@ class PageController extends Controller
             $additionalParams = explode(',', $additionalParams);
             
             foreach($additionalParams as $param):
-                if($param === 'services') {
-                    $ids = Page::query()->whereIn('layout', ['marketing_services', 'technical_services'])->where('is_active', true)->pluck('id')->toArray();
-                    $autofetchSections['services'] = page_details_from_ids($ids);
-                }
+                // if($param === 'services') {
+                //     $ids = Page::query()->whereIn('layout', ['marketing_services', 'technical_services'])->where('is_active', true)->pluck('id')->toArray();
+                //     $autofetchSections['services'] = page_details_from_ids($ids);
+                // }
 
-                if($param === 'industries') {
-                    $ids = Page::query()->whereIn('layout', ['product_industry_detail'])->where('is_active', true)->pluck('id')->toArray();
-                    $autofetchSections['industries'] = page_details_from_ids($ids);
-                }                
+                // if($param === 'industries') {
+                //     $ids = Page::query()->whereIn('layout', ['product_industry_detail'])->where('is_active', true)->pluck('id')->toArray();
+                //     $autofetchSections['industries'] = page_details_from_ids($ids);
+                // }                
 
-                if($param === 'sustainabilities') {
-                    $ids = Page::query()->whereIn('layout', ['sustainability_1', 'sustainability_2', 'sustainability_3','sustainability_4','sustainability_5','sustainability_6'])->where('is_active', true)->pluck('id')->toArray();
-                    $autofetchSections['sustainabilities'] = page_details_from_ids($ids);
-                }                
+                // if($param === 'sustainabilities') {
+                //     $ids = Page::query()->whereIn('layout', ['sustainability_1', 'sustainability_2', 'sustainability_3','sustainability_4','sustainability_5','sustainability_6'])->where('is_active', true)->pluck('id')->toArray();
+                //     $autofetchSections['sustainabilities'] = page_details_from_ids($ids);
+                // }                
 
-                if($param === 'product_categories') {
-                    $ids = Page::query()->whereIn('layout', ['product_category_detail_1','product_category_detail_2','product_category_detail_3','product_category_detail_4','product_category_detail_5'])->where('is_active', true)->pluck('id')->toArray();
-                    $autofetchSections['product_categories'] = page_details_from_ids($ids);
-                }   
+                // if($param === 'product_categories') {
+                //     $ids = Page::query()->whereIn('layout', ['product_category_detail_1','product_category_detail_2','product_category_detail_3','product_category_detail_4','product_category_detail_5'])->where('is_active', true)->pluck('id')->toArray();
+                //     $autofetchSections['product_categories'] = page_details_from_ids($ids);
+                // }   
                 
-                if($param === 'marketing_services') {
-                    $ids = Page::query()->whereIn('layout', ['marketing_service_detail'])->where('is_active', true)->pluck('id')->toArray();
-                    $autofetchSections['marketing_services'] = page_details_from_ids($ids);
-                }     
+                // if($param === 'marketing_services') {
+                //     $ids = Page::query()->whereIn('layout', ['marketing_service_detail'])->where('is_active', true)->pluck('id')->toArray();
+                //     $autofetchSections['marketing_services'] = page_details_from_ids($ids);
+                // }     
 
-                if($param === 'technical_services') {
-                    $ids = Page::query()->whereIn('layout', ['technical_service_detail'])->where('is_active', true)->pluck('id')->toArray();
-                    $autofetchSections['technical_services'] = page_details_from_ids($ids);
-                } 
+                // if($param === 'technical_services') {
+                //     $ids = Page::query()->whereIn('layout', ['technical_service_detail'])->where('is_active', true)->pluck('id')->toArray();
+                //     $autofetchSections['technical_services'] = page_details_from_ids($ids);
+                // } 
 
-                if($param === 'related_products') {
-                    $currentPageId = $page->id;
-                    $currentPageLayout = $page->layout;
-                    $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
-                        // ->whereHas('meta', function ($q) use ($currentPageLayout) {
-                        //     $q->where('meta_key', 'relation_category')
-                        //     ->where('meta_value', $currentPageLayout);
-                        // })
-                        ->pluck('id')->toArray();
-                    $autofetchSections['related_products'] = page_details_from_ids($ids);
-                }    
+                // if($param === 'related_products') {
+                //     $currentPageId = $page->id;
+                //     $currentPageLayout = $page->layout;
+                //     $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
+                //         // ->whereHas('meta', function ($q) use ($currentPageLayout) {
+                //         //     $q->where('meta_key', 'relation_category')
+                //         //     ->where('meta_value', $currentPageLayout);
+                //         // })
+                //         ->pluck('id')->toArray();
+                //     $autofetchSections['related_products'] = page_details_from_ids($ids);
+                // }    
 
-                if($param === 'sustainable_products') {
-                    $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
-                        ->whereHas('meta', function ($q) {
-                            $q->where('meta_key', 'relation_category')
-                            ->where('meta_value', 17); // Assuming 17 is the ID for the sustainable category
-                        })->pluck('id')->toArray();
-                    $autofetchSections['sustainable_products'] = page_details_from_ids($ids);
-                }     
+                // if($param === 'sustainable_products') {
+                //     $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
+                //         ->whereHas('meta', function ($q) {
+                //             $q->where('meta_key', 'relation_category')
+                //             ->where('meta_value', 17); // Assuming 17 is the ID for the sustainable category
+                //         })->pluck('id')->toArray();
+                //     $autofetchSections['sustainable_products'] = page_details_from_ids($ids);
+                // }     
                 
-                if($param === 'lamistraw_products') {
-                    $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
-                        ->whereHas('meta', function ($q) {
-                            $q->where('meta_key', 'relation_category')
-                            ->where('meta_value', 7); // Assuming 6 is the ID for the lamistraw category
-                        })->pluck('id')->toArray();
-                    $autofetchSections['lamistraw_products'] = page_details_from_ids($ids);
-                }                 
+                // if($param === 'lamistraw_products') {
+                //     $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
+                //         ->whereHas('meta', function ($q) {
+                //             $q->where('meta_key', 'relation_category')
+                //             ->where('meta_value', 7); // Assuming 6 is the ID for the lamistraw category
+                //         })->pluck('id')->toArray();
+                //     $autofetchSections['lamistraw_products'] = page_details_from_ids($ids);
+                // }                 
 
-                if($param === 'featured_products') {
-                    $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
-                            ->whereHas('meta', function ($q) {
-                                $q->where('meta_key', 'relation_featured')
-                                ->where('meta_value', 'yes');
-                            })->pluck('id')->toArray();
-                    $autofetchSections['featured_products'] = page_details_from_ids($ids);
-                }  
+                // if($param === 'featured_products') {
+                //     $ids = Page::query()->whereIn('layout', ['products'])->where('is_active', true)
+                //             ->whereHas('meta', function ($q) {
+                //                 $q->where('meta_key', 'relation_featured')
+                //                 ->where('meta_value', 'yes');
+                //             })->pluck('id')->toArray();
+                //     $autofetchSections['featured_products'] = page_details_from_ids($ids);
+                // }  
                 
-                if ($param === 'standard_products') {
-                    $currentPageId = $page->id;
+                // if ($param === 'standard_products') {
+                //     $currentPageId = $page->id;
 
-                    $ids = Page::query()
-                        ->whereIn('layout', ['products'])
-                        ->where('is_active', 1)
-                        ->whereHas('meta', function ($q) use ($currentPageId) {
-                            $q->where('meta_key', 'relation_category')
-                            ->where('meta_value', $currentPageId);
-                        })
-                        ->whereHas('meta', function ($q) {
-                            $q->where('meta_key', 'relation_type')
-                            ->where('meta_value', 'standard');
-                        })
-                        ->pluck('id')
-                        ->toArray();
+                //     $ids = Page::query()
+                //         ->whereIn('layout', ['products'])
+                //         ->where('is_active', 1)
+                //         ->whereHas('meta', function ($q) use ($currentPageId) {
+                //             $q->where('meta_key', 'relation_category')
+                //             ->where('meta_value', $currentPageId);
+                //         })
+                //         ->whereHas('meta', function ($q) {
+                //             $q->where('meta_key', 'relation_type')
+                //             ->where('meta_value', 'standard');
+                //         })
+                //         ->pluck('id')
+                //         ->toArray();
 
-                    $autofetchSections['standard_products'] = page_details_from_ids($ids);
-                } 
+                //     $autofetchSections['standard_products'] = page_details_from_ids($ids);
+                // } 
                 
-                if ($param === 'premium_products') {
-                    $currentPageId = $page->id;
+                // if ($param === 'premium_products') {
+                //     $currentPageId = $page->id;
 
-                    $ids = Page::query()
-                        ->whereIn('layout', ['products'])
-                        ->where('is_active', 1)
-                        ->whereHas('meta', function ($q) use ($currentPageId) {
-                            $q->where('meta_key', 'relation_category')
-                            ->where('meta_value', $currentPageId);
-                        })
-                        ->whereHas('meta', function ($q) {
-                            $q->where('meta_key', 'relation_type')
-                            ->where('meta_value', 'premium');
-                        })
-                        ->pluck('id')
-                        ->toArray();
+                //     $ids = Page::query()
+                //         ->whereIn('layout', ['products'])
+                //         ->where('is_active', 1)
+                //         ->whereHas('meta', function ($q) use ($currentPageId) {
+                //             $q->where('meta_key', 'relation_category')
+                //             ->where('meta_value', $currentPageId);
+                //         })
+                //         ->whereHas('meta', function ($q) {
+                //             $q->where('meta_key', 'relation_type')
+                //             ->where('meta_value', 'premium');
+                //         })
+                //         ->pluck('id')
+                //         ->toArray();
 
-                    $autofetchSections['premium_products'] = page_details_from_ids($ids);
-                }                
+                //     $autofetchSections['premium_products'] = page_details_from_ids($ids);
+                // }                
                 
-                if($param === 'latest_insights') {
-                    $categoryId = 1;
-                    $postsQuery = Post::query()
-                        ->where('is_active', true)
-                        ->whereHas('categories', function ($q) use ($categoryId) {
-                            $q->where('categories.id', $categoryId);
-                        })
-                        ->with('meta')
-                        ->orderByDesc('published_at')
-                        ->limit(8);
+                // if($param === 'latest_insights') {
+                //     $categoryId = 1;
+                //     $postsQuery = Post::query()
+                //         ->where('is_active', true)
+                //         ->whereHas('categories', function ($q) use ($categoryId) {
+                //             $q->where('categories.id', $categoryId);
+                //         })
+                //         ->with('meta')
+                //         ->orderByDesc('published_at')
+                //         ->limit(8);
 
-                    if (auth()->user()?->company_id) {
-                        $postsQuery->where('company_id', auth()->user()->company_id);
-                    }
+                //     if (auth()->user()?->company_id) {
+                //         $postsQuery->where('company_id', auth()->user()->company_id);
+                //     }
 
-                    $latestPosts = $postsQuery->get();
+                //     $latestPosts = $postsQuery->get();
 
-                    $autofetchSections['latest_insights'] = $latestPosts->map(function (Post $post) {
-                        $summary = $post->meta->firstWhere('meta_key', 'short_summary')?->meta_value;
-                        if (!filled($summary)) {
-                            $summary = $post->meta->firstWhere('meta_key', 'summary')?->meta_value;
-                        }
+                //     $autofetchSections['latest_insights'] = $latestPosts->map(function (Post $post) {
+                //         $summary = $post->meta->firstWhere('meta_key', 'short_summary')?->meta_value;
+                //         if (!filled($summary)) {
+                //             $summary = $post->meta->firstWhere('meta_key', 'summary')?->meta_value;
+                //         }
 
-                        $date = $post->meta->firstWhere('meta_key', 'date')?->meta_value;
-                        $time = $post->meta->firstWhere('meta_key', 'time')?->meta_value;
+                //         $date = $post->meta->firstWhere('meta_key', 'date')?->meta_value;
+                //         $time = $post->meta->firstWhere('meta_key', 'time')?->meta_value;
 
-                        return [
-                            'id' => $post->id,
-                            'title' => $post->title,
-                            'slug' => $post->slug,
-                            'featured_image' => filled($post->featured_image)
-                                ? uploaded_asset_details_from_ids($post->featured_image)
-                                : null,
-                            'summary' => $summary,
-                            'date' => filled($date) ? $date : null,
-                            'time' => filled($time) ? $time : null,
-                        ];
-                    })->values()->all();
-                }  
+                //         return [
+                //             'id' => $post->id,
+                //             'title' => $post->title,
+                //             'slug' => $post->slug,
+                //             'featured_image' => filled($post->featured_image)
+                //                 ? uploaded_asset_details_from_ids($post->featured_image)
+                //                 : null,
+                //             'summary' => $summary,
+                //             'date' => filled($date) ? $date : null,
+                //             'time' => filled($time) ? $time : null,
+                //         ];
+                //     })->values()->all();
+                // }  
                 
-                if($param === 'latest_news') {
-                    $categoryId = 18;
-                    $postsQuery = Post::query()
-                        ->where('is_active', true)
-                        ->whereHas('categories', function ($q) use ($categoryId) {
-                            $q->where('categories.id', $categoryId);
-                        })
-                        ->with('meta')
-                        ->orderByDesc('published_at')
-                        ->limit(8);
+                // if($param === 'latest_news') {
+                //     $categoryId = 18;
+                //     $postsQuery = Post::query()
+                //         ->where('is_active', true)
+                //         ->whereHas('categories', function ($q) use ($categoryId) {
+                //             $q->where('categories.id', $categoryId);
+                //         })
+                //         ->with('meta')
+                //         ->orderByDesc('published_at')
+                //         ->limit(8);
 
-                    if (auth()->user()?->company_id) {
-                        $postsQuery->where('company_id', auth()->user()->company_id);
-                    }
+                //     if (auth()->user()?->company_id) {
+                //         $postsQuery->where('company_id', auth()->user()->company_id);
+                //     }
 
-                    $latestPosts = $postsQuery->get();
+                //     $latestPosts = $postsQuery->get();
 
-                    $autofetchSections['latest_news'] = $latestPosts->map(function (Post $post) {
-                        $summary = $post->meta->firstWhere('meta_key', 'short_summary')?->meta_value;
-                        if (!filled($summary)) {
-                            $summary = $post->meta->firstWhere('meta_key', 'summary')?->meta_value;
-                        }
+                //     $autofetchSections['latest_news'] = $latestPosts->map(function (Post $post) {
+                //         $summary = $post->meta->firstWhere('meta_key', 'short_summary')?->meta_value;
+                //         if (!filled($summary)) {
+                //             $summary = $post->meta->firstWhere('meta_key', 'summary')?->meta_value;
+                //         }
 
-                        $date = $post->meta->firstWhere('meta_key', 'date')?->meta_value;
-                        $time = $post->meta->firstWhere('meta_key', 'time')?->meta_value;
+                //         $date = $post->meta->firstWhere('meta_key', 'date')?->meta_value;
+                //         $time = $post->meta->firstWhere('meta_key', 'time')?->meta_value;
 
-                        return [
-                            'id' => $post->id,
-                            'title' => $post->title,
-                            'slug' => $post->slug,
-                            'featured_image' => filled($post->featured_image)
-                                ? uploaded_asset_details_from_ids($post->featured_image)
-                                : null,
-                            'summary' => $summary,
-                            'date' => filled($date) ? $date : null,
-                            'time' => filled($time) ? $time : null,
-                        ];
-                    })->values()->all();
-                }                 
+                //         return [
+                //             'id' => $post->id,
+                //             'title' => $post->title,
+                //             'slug' => $post->slug,
+                //             'featured_image' => filled($post->featured_image)
+                //                 ? uploaded_asset_details_from_ids($post->featured_image)
+                //                 : null,
+                //             'summary' => $summary,
+                //             'date' => filled($date) ? $date : null,
+                //             'time' => filled($time) ? $time : null,
+                //         ];
+                //     })->values()->all();
+                // }                 
             endforeach;
 
         }

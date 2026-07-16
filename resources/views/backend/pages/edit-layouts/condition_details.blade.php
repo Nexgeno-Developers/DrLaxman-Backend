@@ -104,7 +104,7 @@
     $selectedConditions = json_decode($getMeta('conditions', '[]'), true);
     $selectedConditions = is_array($selectedConditions) ? array_map('intval', $selectedConditions) : [];
     $conditionOptions = Page::query()
-        ->where('layout', 'conditions')
+        ->whereIn('layout', ['conditions', 'condition_details'])
         ->where('is_active', true)
         ->where('id', '!=', $pageData->id)
         ->orderBy('title')
@@ -664,8 +664,8 @@
     </div>
 
     <div class="col-md-12 form-group mb-2">
-        <label class="form-label">Conditions <span class="text-danger">*</span></label>
-        <select class="form-control select2" name="meta[conditions][]" multiple required>
+        <label class="form-label">Conditions</label>
+        <select class="form-control select2" name="meta[conditions][]" multiple>
             @foreach($conditionOptions as $condition)
                 <option value="{{ $condition->id }}" {{ in_array((int) $condition->id, $selectedConditions, true) ? 'selected' : '' }}>
                     {{ $condition->title }}

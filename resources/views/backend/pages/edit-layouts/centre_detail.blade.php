@@ -47,7 +47,7 @@
     $selectedConditions = is_array($selectedConditions) ? array_map('intval', $selectedConditions) : [];
 
     $conditionOptions = Page::query()
-        ->where('layout', 'conditions')
+        ->whereIn('layout', ['conditions', 'condition_details'])
         ->where('is_active', true)
         ->orderBy('title')
         ->get(['id', 'title']);
