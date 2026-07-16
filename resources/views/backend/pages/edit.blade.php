@@ -139,31 +139,6 @@
             $slugInput.prop('readonly', shouldLock);
         };
 
-        const initOrderedSelects = function (scope) {
-            $(scope).find('.ordered-select2').each(function () {
-                const $select = $(this);
-
-                if ($select.data('ordered-select-bound')) {
-                    return;
-                }
-
-                $select.data('ordered-select-bound', true);
-
-                $select.on('select2:select', function (event) {
-                    const selectedId = String(event.params.data.id);
-                    const $option = $select.find('option').filter(function () {
-                        return String($(this).val()) === selectedId;
-                    }).first();
-
-                    if ($option.length) {
-                        $option.detach();
-                        $select.append($option);
-                        $select.trigger('change.select2');
-                    }
-                });
-            });
-        };
-
         // Toggle content visibility on initial load
         if ($layoutSelect.val() !== 'default') {
             $contentGroup.addClass('d-none');
@@ -173,7 +148,6 @@
 
         // Toggle slug readonly on initial load
         toggleSlugReadonly($layoutSelect.val());
-        initOrderedSelects(document);
 
         $layoutSelect.on('change', function () {
             const newLayout = $(this).val();
@@ -199,7 +173,6 @@
                     // Re-init plugins and events for newly injected fields
                     initAizPlugins();
                     initOtherPlugins();
-                    initOrderedSelects('#layout-fields-container');
 
                     // Toggle content visibility based on selected layout
                     if (newLayout !== 'default') {

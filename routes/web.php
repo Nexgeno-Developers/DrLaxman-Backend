@@ -107,7 +107,6 @@ Route::prefix('backend')->group(function () {
     
     //Pages Routes
     Route::middleware('auth.backend')->group(function () {
-        Route::get('pages/layout-fields', [PageController::class, 'layoutFields'])->name('pages.layout-fields.create');
         Route::get('pages/{page}/layout-fields', [PageController::class, 'layoutFields'])->name('pages.layout-fields');
         Route::get('pages/{page}/clone', [PageController::class, 'clone'])->name('pages.clone');
         Route::resource('pages', PageController::class);
