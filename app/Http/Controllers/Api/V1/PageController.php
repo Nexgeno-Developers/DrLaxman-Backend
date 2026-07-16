@@ -33,6 +33,7 @@ class PageController extends Controller
         'breadcrumb_picture',
         'our_story_image_1',
         'our_story_image_2',
+        'arrangements_image',
         'banner_desktop',
         'banner_mobile',
         'global_scale_image',

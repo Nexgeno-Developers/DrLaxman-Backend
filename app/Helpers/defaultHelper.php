@@ -204,6 +204,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Testimonials',
                 'description' => 'Layout for testimonial pages with review intro and trust counters.',
             ],
+            'medical_tourism' => [
+                'label' => 'Medical Tourism',
+                'description' => 'Layout for medical tourism pages with breadcrumb and arrangements content.',
+            ],
 
         ];
 
