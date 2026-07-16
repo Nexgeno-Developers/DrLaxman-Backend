@@ -12,11 +12,10 @@ use Illuminate\Http\Request;
 
 class PageController extends Controller
 {
-    // Upload-based meta keys
+    // Keep these resolver lists aligned with resources/views/backend/pages/edit-layouts/*
+    // whenever a page layout adds a new upload, post-category, or page-reference meta field.
     private array $uploadMetaKeys = [
         'banner_images',
-        'short_summary_icon',
-        'hero_image',
         'single_image',
         'multiple_image',
         'single_document',
@@ -26,115 +25,40 @@ class PageController extends Controller
         'image',
         'icon',
         'breadcrumb_image',
-        'insights_image',
-        'pilot_plant_image',
-        'leading_image',
-        'short_summary_image',
-        'technical_sheet',
-        'desktop_banner',
-        'mobile_banner',        
-        'about_image',        
-        'about_image_secondary',        
-        'vision_mission_image',        
-        'ethical_banner',        
-        'global_standard_image',
-        'timeline_certificates',
-        'certificates',
-        'community_image',
-        'membership_map',
-        'membership_block_1_icon',
-        'membership_block_2_icon',
-        'membership_block_3_icon',
-        'hr_photo',
-        'recycling_journey_image',
-        'lamipak_commitment_image',
-        'sustainable_packaging_vision_image',
-        'shared_guide_image',
-        'social_world_images',
-        'sustainability_journey_image',
-        'global_beverage_image',
-        'consultation_background_image',
-        'side_image',
+        'overview_image',
         'banner_desktop',
         'banner_mobile',
-        'growth_image',
         'global_scale_image',
         'knowledge_center_image',
         'sustainability_image',
         'business_services_image',
-        'global_image',
     ];
 
-    // Post reference keys
     private array $post_category_MetaKeys = [
         'post_block_categories',
     ];
 
-    // Page reference keys
     private array $pageSectionMetaKeys = [
-        'product_categories',
-        'recommended_products',
-        'standard_products',
-        'premium_products',
-        'products',
         'conditions',
         'centres',
-        'relation_category',
-        'relation_industries',
-        'page_blocks',        
-        'pilot_plant_pages',        
-        'application_versatility_product_industries',
-        'approach_product_industries',
     ];
 
-    // JSON dynamic keys
+    // JSON/repeater keys used by current page layouts.
     private array $dynamicJsonMetaKeys = [
         'dynamic_field',
-        'hero_items',
-        'info_items',
-        'product_info_items',
-        'features_items',
-        'breadcrumb_key_highlights',
+        'select_multiple',
+        'checkbox_options',
         'types_stages_items',
         'treatment_items',
+        'treatment_recommendation',
+        'why_treat_description',
         'recovery_timeline_items',
         'faq_items',
-        'accessories_items',
-        'highlights_items',
-        'brand_journey_items',
-        'differentiation_items',
-        'information_items',
-        'faqs_items',
-        'banner_items',
-        'sizes_formats',    
-        'business_statistics_items',    
-        'journey_items',    
-        'values_items',
-        'solution_items',
-        'governance_items',    
-        'risk_control_items',    
-        'global_standard_items',    
-        'digital_trust_items',    
-        'speak_up_items', 
-        'support_items',
-        'sustainability_section_items',
-        'path_items',
-        'lifecycle_items',
-        'laboratory_zones_items',
-        'why_carton_items',
-        'special_ability_items',
-        'special_ability_images',
-        'lamira_love_items',
-        'ecosystem_items',
-        'application_versatility_items',
-        'global_count_items',
         'global_scale_year_items',
+        'global_scale_stat_items',
         'knowledge_center_items',
         'sustainability_items',
         'business_services_items',
-        'global_scale_stat_items',
-
-
     ];
 
     /**
