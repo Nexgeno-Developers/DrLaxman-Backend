@@ -180,6 +180,10 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Teams',
                 'description' => 'Layout for team listing pages with repeatable profile cards.',
             ],
+            'about_me' => [
+                'label' => 'About Me',
+                'description' => 'Layout for about me pages with credentials, story, trust, and centre highlights.',
+            ],
 
         ];
 
