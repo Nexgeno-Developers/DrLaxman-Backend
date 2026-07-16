@@ -26,10 +26,14 @@ class FormSubmissionMail extends Mailable
 
     public function build()
     {
-        // return $this->subject(config('custom.app_name'))
-        //             ->markdown('emails.form_submission');
-        return $this->from($this->data['email'], $this->data['name'] ?? null) // set user email as from
-               ->subject(config('custom.app_name'))
-               ->markdown('emails.form_submission');        
+        $fromAddress = filter_var($this->data['email'] ?? null, FILTER_VALIDATE_EMAIL)
+            ? $this->data['email']
+            : config('mail.from.address');
+
+        $fromName = $this->data['name'] ?? config('mail.from.name');
+
+        return $this->from($fromAddress, $fromName)
+            ->subject(config('custom.app_name'))
+            ->markdown('emails.form_submission');
     }
 }

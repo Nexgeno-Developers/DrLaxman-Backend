@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class FormSubmissionController extends Controller
 {
@@ -36,14 +37,13 @@ class FormSubmissionController extends Controller
         }
 
         $validationRules = $this->getValidationRules($formName);
-        $validatedData = $request->validate($validationRules);
+        $validationData = array_merge($request->all(), $request->allFiles());
+        $validatedData = Validator::make($validationData, $validationRules)->validate();
 
 
 
         $companyId = $request->input('company_id') ?? 1;
 
-        // Keep parity with your web controller: store only validated scalar fields
-        // (excluding name/email/phone/form_name/company_id).
         $formData = collect($validatedData)
             ->except(['form_name', 'name', 'email', 'phone'])
             ->toArray();
@@ -84,14 +84,16 @@ class FormSubmissionController extends Controller
         // Best-effort integration: do not block the main submission if the external API fails.
         $this->sendLeadToExternalApiBestEffort($request, $formName, (int) $form->id);
 
-        // Keep the same behavior as the web flow (send email to your configured recipient).
-        // $recipientEmail = [config('custom.from_email')];
-        // try {
-        //     Mail::to($recipientEmail)->send(new FormSubmissionMail($formName, array_merge($validatedData, $formData)));
-        // } catch (\Throwable $e) {
-        //     // Avoid failing the submission if email fails.
-        //     logger('Form submission mail failed: ' . $e->getMessage());
-        // }
+        $recipientEmail = config('custom.from_email');
+        if (!empty($recipientEmail)) {
+            try {
+                Mail::to([$recipientEmail])->send(
+                    new FormSubmissionMail($formName, $this->buildMailData($validatedData, $formData))
+                );
+            } catch (\Throwable $e) {
+                logger('Form submission mail failed: ' . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'data' => [
@@ -449,52 +451,60 @@ class FormSubmissionController extends Controller
         return 'storage/' . $path;
     }
 
+    private function buildMailData(array $validatedData, array $formData): array
+    {
+        $mailData = array_merge($validatedData, $formData);
+
+        array_walk_recursive($mailData, function (&$value) {
+            if (!is_string($value)) {
+                return;
+            }
+
+            if (str_starts_with($value, 'storage/')) {
+                $value = url($value);
+            }
+        });
+
+        return $mailData;
+    }
+
     private function getValidationRules(string $formName): array
     {
         switch ($formName) {
-            case 'subscription':
+            case 'general_consultation':
                 return [
-                    'form_name' => 'required|max:20',
-                    'email' => 'required|email|max:50',
+                    'form_name' => 'required|string|in:general_consultation',
+                    'name' => 'required|string|max:100',
+                    'email' => 'required|email|max:100',
+                    'phone' => 'required|string|max:30',
+                    'centre' => 'required|string|max:255',
+                    'symptoms' => 'required|string|max:1000',
                 ];
 
-            case 'get_in_touch':
+            case 'international_video_call':
                 return [
-                    'form_name' => 'required|max:20',
-                    'name' => 'required|string|max:50',
-                    'email' => 'required|email|max:50',
+                    'form_name' => 'required|string|in:international_video_call',
+                    'name' => 'required|string|max:100',
+                    'email' => 'required|email|max:100',
+                    'phone' => 'required|string|max:30',
+                    'country' => 'required|string|max:100',
+                    'timezone' => 'required|string|max:100',
+                    'datetime' => 'required|string|max:100',
+                    'condition' => 'required|string|max:255',
+                    'reports' => 'nullable|array',
+                    'reports.*' => 'file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
                 ];
 
-            case 'message':
+            case 'home_blood_test':
                 return [
-                    'form_name' => 'required|max:20',
-                    'name' => 'nullable|string|max:50',
-                    'first_name' => 'required|string|max:50',
-                    'last_name' => 'required|string|max:50',
-                    'phone' => 'nullable|digits_between:10,15|max:50',
-                    'email' => 'required|email|max:50',
-                    'message' => 'nullable|string|max:200',
-                ]; 
-                
-            case 'contact':
-                return [
-                    'form_name' => 'required|max:20',
-                    'name' => 'nullable|string|max:50',
-                    'first_name' => 'required|string|max:50',
-                    'last_name' => 'required|string|max:50',
-                    'email' => 'required|email|max:50',
-                    'phone' => 'nullable|digits_between:10,15|max:50',
-                    'company_name' => 'required|string|max:50',
-                    'company_url' => 'nullable|string|max:255',
-                    'job_function'=> 'required|string|max:50',
-                    'job_title'   => 'required|string|max:50',
-                    'country'     => 'required|string|max:50',
-                    'interests' => 'required|string|max:200',
-                    'interested_products' => 'nullable|string|max:200|required_if:interests,Products & Services',
-                    'interested_marketing_support_service' => 'nullable|string|max:200|required_if:interests,Products & Services',
-                    'interested_technical_support_service' => 'nullable|string|max:200|required_if:interests,Products & Services',
-                    'message' => 'nullable|string|max:200',
-                ];                  
+                    'form_name' => 'required|string|in:home_blood_test',
+                    'name' => 'required|string|max:100',
+                    'phone' => 'required|string|max:30',
+                    'home_address' => 'required|string|max:1000',
+                    'date' => 'required|string|max:50',
+                    'time_slot' => 'required|string|max:100',
+                    'test' => 'required|string|max:255',
+                ];
 
             default:
                 return [
