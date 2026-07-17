@@ -25,6 +25,8 @@ class PageController extends Controller
         'image',
         'icon',
         'breadcrumb_image',
+        'how_it_works_icon',
+        'about_picture',
         'overview_image',
         'about_treatment_image',
         'benefits_image',
@@ -40,6 +42,7 @@ class PageController extends Controller
         'knowledge_center_image',
         'sustainability_image',
         'business_services_image',
+        'why_we_image',
     ];
 
     private array $post_category_MetaKeys = [
@@ -75,6 +78,14 @@ class PageController extends Controller
         'knowledge_center_items',
         'sustainability_items',
         'business_services_items',
+        'how_it_works_items',
+        'breadcrumb_items',
+        'about_items',
+        'achievement_items',
+        'symptom_checker_items',
+        'why_we_items',
+        'why_choose_comparison_items',
+        'plan_your_surgery_items',
     ];
 
     /**

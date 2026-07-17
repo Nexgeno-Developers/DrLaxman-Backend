@@ -208,6 +208,14 @@ if (!function_exists('getPageLayouts')) {
                 'label' => 'Medical Tourism',
                 'description' => 'Layout for medical tourism pages with breadcrumb and arrangements content.',
             ],
+            'blood_test' => [
+                'label' => 'Blood Test',
+                'description' => 'Layout for blood test pages with hero, process, availability, and coverage area sections.',
+            ],
+            'symptom_checker' => [
+                'label' => 'Symptom Checker',
+                'description' => 'Layout for symptom checker pages with breadcrumb content and highlights.',
+            ],
 
         ];
 
