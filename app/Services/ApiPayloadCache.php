@@ -215,6 +215,26 @@ class ApiPayloadCache
             . ':r:' . $localRev;
     }
 
+    private static function metadataPayloadKey(): string
+    {
+        $schemaVersion = 'sv1';
+        $pagesGraph = self::getIntRevision(self::globalAutofetchRevisionKey());
+
+        return self::basePrefix()
+            . ':metadata:'
+            . $schemaVersion
+            . ':p:' . $pagesGraph;
+    }
+
+    private static function reviewsPayloadKey(): string
+    {
+        $schemaVersion = 'sv1';
+
+        return self::basePrefix()
+            . ':reviews:'
+            . $schemaVersion;
+    }
+
     /**
      * @return array<string, mixed>|null  Cached payload, or null if missing / invalid / read error.
      */
@@ -243,11 +263,43 @@ class ApiPayloadCache
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    public static function getCachedMetadataPayload(): ?array
+    {
+        return self::getPayloadArray(self::metadataPayloadKey());
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function getCachedReviewsPayload(): ?array
+    {
+        return self::getPayloadArray(self::reviewsPayloadKey());
+    }
+
+    /**
      * @param  array<string, mixed>  $payload
      */
     public static function storeRobotsTxtPayload(int $companyId, array $payload): void
     {
         self::storePayloadArray(self::robotsTxtPayloadKey($companyId), $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public static function storeMetadataPayload(array $payload): void
+    {
+        self::storePayloadArray(self::metadataPayloadKey(), $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public static function storeReviewsPayload(array $payload): void
+    {
+        self::storePayloadArray(self::reviewsPayloadKey(), $payload);
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\AuthorController;
 use App\Http\Controllers\Api\V1\SitemapController;
 use App\Http\Controllers\Api\V1\SeoSettingController;
+use App\Http\Controllers\Api\V1\MetaDataController;
 
 Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
     // Menu group (and its active item tree)
@@ -19,6 +20,12 @@ Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
 
     // Company info by company id
     Route::get('companies/{id}', [CompanyController::class, 'showById'])->whereNumber('id');
+
+    // Shared metadata for frontend forms and dropdowns
+    Route::get('metadata', [MetaDataController::class, 'index']);
+
+    // Static dummy reviews
+    Route::get('reviews', [MetaDataController::class, 'reviews']);
 
     // Public form submission API (expects multipart/form-data when uploading files).
     Route::post('forms/submit', [FormSubmissionController::class, 'submit'])

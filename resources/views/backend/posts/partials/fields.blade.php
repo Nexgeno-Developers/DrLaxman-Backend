@@ -11,10 +11,10 @@
 @endif
 
 @foreach ($sections as $section)
-    <div class="row">
+    <div class="row g-2">
         <div class="col-md-12">
             <hr>
-            <h4 class="text-primary">{{ $section['title'] ?? 'Section' }}</h4>
+            <h4 class="text-primary mb-2">{{ $section['title'] ?? 'Section' }}</h4>
         </div>
 
         @foreach (($section['fields'] ?? []) as $field)
@@ -26,11 +26,12 @@
                 $required = isset($field['rules']) && str_contains($field['rules'], 'required');
                 $value = post_meta_form_value($postData, $field);
                 $inputId = 'meta_' . $key;
+                $fieldCol = $field['col'] ?? 'col-md-12';
             @endphp
 
             @switch($type)
                 @case('textarea')
-                    <div class="col-md-12 form-group mb-2">
+                    <div class="{{ $fieldCol }} form-group mb-2">
                         <label for="{{ $inputId }}" class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -46,7 +47,7 @@
                     @break
 
                 @case('editor')
-                    <div class="col-md-12 form-group mb-2">
+                    <div class="{{ $fieldCol }} form-group mb-2">
                         <label for="{{ $inputId }}" class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -65,7 +66,7 @@
                     @php
                         $selectedValue = old('meta.' . $key, $value);
                     @endphp
-                    <div class="col-md-12 form-group mb-2">
+                    <div class="{{ $fieldCol }} form-group mb-2">
                         <label for="{{ $inputId }}" class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -90,7 +91,7 @@
                         $selectedValues = old('meta.' . $key, $value);
                         $selectedValues = is_array($selectedValues) ? $selectedValues : [];
                     @endphp
-                    <div class="col-md-12 form-group mb-2">
+                    <div class="{{ $fieldCol }} form-group mb-2">
                         <label for="{{ $inputId }}" class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -111,7 +112,7 @@
                     @break
 
                 @case('date')
-                    <div class="col-md-12 form-group mb-2">
+                    <div class="{{ $fieldCol }} form-group mb-2">
                         <label for="{{ $inputId }}" class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -127,7 +128,7 @@
                     @break
 
                 @case('time')
-                    <div class="col-md-12 form-group mb-2">
+                    <div class="{{ $fieldCol }} form-group mb-2">
                         <label for="{{ $inputId }}" class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -146,7 +147,7 @@
                     @php
                         $selectedValue = old('meta.' . $key, $value);
                     @endphp
-                    <div class="col-md-12">
+                    <div class="{{ $fieldCol }}">
                         <label class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -167,7 +168,7 @@
                     @php
                         $selectedValue = old('meta.' . $key, $value);
                     @endphp
-                    <div class="col-md-12">
+                    <div class="{{ $fieldCol }}">
                         <label class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
@@ -313,7 +314,7 @@
                     @break
 
                 @default
-                    <div class="col-md-12 form-group mb-2">
+                    <div class="{{ $fieldCol }} form-group mb-2">
                         <label for="{{ $inputId }}" class="form-label">
                             {{ $label }} @if($required) <span class="text-danger">*</span> @endif
                         </label>
