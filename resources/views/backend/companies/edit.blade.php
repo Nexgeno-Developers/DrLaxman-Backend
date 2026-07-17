@@ -123,6 +123,36 @@
                 </div>
             </div>
 
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="text-uppercase mt-0 mb-3 bg-light p-2">Global Navigation</h5>
+                    <div class="mb-3 form-group">
+                        <label for="meta-about-me" class="form-label">About Me</label>
+                        <input type="text" class="form-control" id="meta-about-me" name="meta[about_me]" value="{{ old('meta.about_me', $pageData->meta->where('meta_key', 'about_me')->first()->meta_value ?? '') }}" placeholder="Enter About Me link or text">
+                    </div>
+                    <div class="mb-3 form-group">
+                        <label for="meta-consultation" class="form-label">Consultation</label>
+                        <input type="text" class="form-control" id="meta-consultation" name="meta[consultation]" value="{{ old('meta.consultation', $pageData->meta->where('meta_key', 'consultation')->first()->meta_value ?? '') }}" placeholder="Enter Consultation link or text">
+                    </div>
+                    <div class="mb-3 form-group">
+                        <label for="meta-symptoms" class="form-label">Symptoms</label>
+                        <input type="text" class="form-control" id="meta-symptoms" name="meta[symptoms]" value="{{ old('meta.symptoms', $pageData->meta->where('meta_key', 'symptoms')->first()->meta_value ?? '') }}" placeholder="Enter Symptoms link or text">
+                    </div>
+                    <div class="mb-3 form-group">
+                        <label for="meta-blood-test" class="form-label">Blood Test</label>
+                        <input type="text" class="form-control" id="meta-blood-test" name="meta[blood_test]" value="{{ old('meta.blood_test', $pageData->meta->where('meta_key', 'blood_test')->first()->meta_value ?? '') }}" placeholder="Enter Blood Test link or text">
+                    </div>
+                    <div class="mb-3 form-group">
+                        <label for="meta-patient-stories" class="form-label">Patient Stories</label>
+                        <input type="text" class="form-control" id="meta-patient-stories" name="meta[patient_stories]" value="{{ old('meta.patient_stories', $pageData->meta->where('meta_key', 'patient_stories')->first()->meta_value ?? '') }}" placeholder="Enter Patient Stories link or text">
+                    </div>
+                    <div class="mb-3 form-group">
+                        <label for="meta-google-reviews" class="form-label">Google Reviews</label>
+                        <input type="text" class="form-control" id="meta-google-reviews" name="meta[google_reviews]" value="{{ old('meta.google_reviews', $pageData->meta->where('meta_key', 'google_reviews')->first()->meta_value ?? '') }}" placeholder="Enter Google Reviews link or text">
+                    </div>
+                </div>
+            </div>
+
             <!-- SEO -->
             {{-- <div class="card">
                 <div class="card-body">

@@ -102,8 +102,6 @@
 
     $cost_insurance_title = $getMeta('cost_insurance_title');
     $cost_insurance_description = $getMeta('cost_insurance_description');
-    $cost_insurance_centres = $getMeta('cost_insurance_centres');
-
     $faq_title = $getMeta('faq_title');
     $faq_items = $getRepeater('faq_items');
 
@@ -569,11 +567,6 @@
     <div class="col-md-6 form-group mb-2">
         <label class="form-label">Title <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[cost_insurance_title]" value="{{ $cost_insurance_title }}" placeholder="Enter cost & insurance title" required>
-    </div>
-
-    <div class="col-md-6 form-group mb-2">
-        <label class="form-label">Check Insurance & Centres <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" name="meta[cost_insurance_centres]" value="{{ $cost_insurance_centres }}" placeholder="Enter centres or check insurance text" required>
     </div>
 
     <div class="col-md-12 form-group mb-2">

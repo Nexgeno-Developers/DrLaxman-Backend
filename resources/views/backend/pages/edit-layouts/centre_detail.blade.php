@@ -40,6 +40,7 @@
     };
 
     $breadcrumb_centre_name = $getMeta('breadcrumb_centre_name');
+    $centre_type = $getMeta('type');
     $breadcrumb_title = $getMeta('breadcrumb_title');
     $breadcrumb_description = $getMeta('breadcrumb_description');
     $breadcrumb_image = $getMeta('breadcrumb_image');
@@ -58,7 +59,6 @@
     $insurance_title = $getMeta('insurance_title');
     $insurance_description = $getMeta('insurance_description');
     $insurance_tagline = $getMeta('insurance_tagline');
-    $insurance_matrix = $getMeta('insurance_matrix');
 
     $selectedConditions = json_decode($getMeta('conditions', '[]'), true);
     $selectedConditions = is_array($selectedConditions) ? array_map('intval', $selectedConditions) : [];
@@ -185,11 +185,6 @@
         <label class="form-label">Tagline <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="meta[insurance_tagline]" value="{{ $insurance_tagline }}" placeholder="Enter tagline" required>
     </div>
-
-    <div class="col-md-6 form-group mb-2">
-        <label class="form-label">Full Insurance & Centre Matrix <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" name="meta[insurance_matrix]" value="{{ $insurance_matrix }}" placeholder="Enter full insurance & centre matrix text" required>
-    </div>
 </div>
 
 <div class="row">
@@ -206,6 +201,22 @@
                     {{ $condition->title }}
                 </option>
             @endforeach
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <hr>
+        <h4 class="text-primary">Type Section</h4>
+    </div>
+
+    <div class="col-md-12 form-group mb-2">
+        <label class="form-label">Type <span class="text-danger">*</span></label>
+        <select class="form-control select2" name="meta[type]" required>
+            <option value="">Select type</option>
+            <option value="Consulting" {{ $centre_type === 'Consulting' ? 'selected' : '' }}>Consulting</option>
+            <option value="Operating" {{ $centre_type === 'Operating' ? 'selected' : '' }}>Operating</option>
         </select>
     </div>
 </div>
