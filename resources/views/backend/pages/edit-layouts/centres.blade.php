@@ -13,6 +13,7 @@
     $selectedCentres = is_array($selectedCentres) ? array_map('intval', $selectedCentres) : [];
 
     $centreOptions = Page::query()
+        ->with('meta')
         ->where('layout', 'centre_detail')
         ->where('is_active', true)
         ->orderBy('title')
@@ -63,8 +64,12 @@
         <label class="form-label">Centers <span class="text-danger">*</span></label>
         <select class="form-control select2 ordered-select2" name="meta[centres][]" multiple required>
             @foreach($orderedCentreOptions as $centre)
+                @php
+                    $centreType = $centre->meta->where('meta_key', 'type')->first()->meta_value ?? null;
+                    $centreLabel = $centre->title . ($centreType ? ' (' . $centreType . ')' : '');
+                @endphp
                 <option value="{{ $centre->id }}" {{ in_array((int) $centre->id, $selectedCentres, true) ? 'selected' : '' }}>
-                    {{ $centre->title }}
+                    {{ $centreLabel }}
                 </option>
             @endforeach
         </select>
