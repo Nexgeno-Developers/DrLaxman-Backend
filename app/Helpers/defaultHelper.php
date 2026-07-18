@@ -280,6 +280,13 @@ if (!function_exists('getPostLayoutConfig')) {
                                 'placeholder' => 'Detailed summary (optional)',
                                 'rules' => 'nullable|string|max:800',
                             ],
+                            [
+                                'key' => 'gallery',
+                                'label' => 'Gallery',
+                                'type' => 'images',
+                                'col' => 'col-md-12',
+                                'rules' => 'nullable|string',
+                            ],
                             // [
                             //     'key' => 'hero_image',
                             //     'label' => 'Hero Image',
