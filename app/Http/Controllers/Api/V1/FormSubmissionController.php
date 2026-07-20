@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class FormSubmissionController extends Controller
@@ -26,6 +27,22 @@ class FormSubmissionController extends Controller
      */
     public function submit(Request $request)
     {
+        if ($request->filled('referer_url') && !$request->filled('referrer_url')) {
+            $request->merge([
+                'referrer_url' => $request->input('referer_url'),
+            ]);
+        }
+
+        $normalizedFiles = $this->normalizedFiles($request);
+        $this->logUploadDebug('normalized_files', [
+            'form_name' => $request->input('form_name'),
+            'all_input_keys' => array_keys($request->all()),
+            'all_file_keys' => array_keys($request->allFiles()),
+            'normalized_file_keys' => array_keys($normalizedFiles),
+            'all_files' => $this->describeFiles($request->allFiles()),
+            'normalized_files' => $this->describeFiles($normalizedFiles),
+        ]);
+
         $formName = $request->input('form_name');
         if (!$formName) {
             return response()->json([
@@ -37,28 +54,34 @@ class FormSubmissionController extends Controller
         }
 
         $validationRules = $this->getValidationRules($formName);
-        $validationData = array_merge($request->all(), $request->allFiles());
+        $validationData = array_merge($request->all(), $normalizedFiles);
+        if (isset($validationData['reports']) && $validationData['reports'] instanceof UploadedFile) {
+            $validationData['reports'] = [$validationData['reports']];
+        }
         $validatedData = Validator::make($validationData, $validationRules)->validate();
-
-
 
         $companyId = $request->input('company_id') ?? 1;
 
         $formData = collect($validatedData)
-            ->except(['form_name', 'name', 'email', 'phone'])
+            ->except(['form_name', 'name', 'email', 'phone', 'company_id', 'reports'])
             ->toArray();
 
-        // Add uploaded files (multipart) into form_data under their input field name.
-        // We store a storage-relative public path (prefixed with `storage/`)
-        // so the backend can render it using `my_asset()`.
-        $files = $request->allFiles();
-        foreach ($files as $field => $fileValue) {
+        foreach ($normalizedFiles as $field => $fileValue) {
             $stored = $this->storeFileValue($fileValue, $formName, (string) $companyId);
             if ($stored === null) {
+                $this->logUploadDebug('store_skipped', [
+                    'field' => $field,
+                    'reason' => 'storeFileValue returned null',
+                    'incoming' => $this->describeSingleFileValue($fileValue),
+                ]);
                 continue;
             }
 
             $formData[$field] = $stored;
+            $this->logUploadDebug('stored_file', [
+                'field' => $field,
+                'stored' => $stored,
+            ]);
         }
 
         $name = $request->input('name');
@@ -78,11 +101,6 @@ class FormSubmissionController extends Controller
             'ip' => $request->ip(),
             'company_id' => $companyId,
         ]);
-
-
-        // Keep the same behavior as the web flow (send email to your configured recipient).
-        // Best-effort integration: do not block the main submission if the external API fails.
-        $this->sendLeadToExternalApiBestEffort($request, $formName, (int) $form->id);
 
         $recipientEmail = config('custom.from_email');
         if (!empty($recipientEmail)) {
@@ -105,281 +123,61 @@ class FormSubmissionController extends Controller
         ], 201);
     }
 
-    /**
-     * Send lead data to the external endpoint (query-string based POST).
-     * This function never throws; it only logs failures.
-     */
-    private function sendLeadToExternalApiBestEffort(Request $request, string $formName, int|string $formId): void
+    private function normalizedFiles(Request $request): array
     {
-        try {
-            $endpoint = (string) (config('services.lamipak_lead.endpoint')
-                ?? env('LAMIPAK_LEAD_ENDPOINT'));
+        $files = $request->allFiles();
 
-            $url = $this->buildExternalLeadApiUrl($endpoint, $request, $formName);
-
-            // Best-effort: external call should not hang the main API.
-            if (!function_exists('curl_init')) {
-                logger('External lead API: curl extension is not available', [
-                    'form_id' => $formId,
-                    'form_name' => $formName,
-                ]);
-                return;
-            }
-
-            $ch = curl_init();
-            if ($ch === false) {
-                logger('External lead API: curl_init failed', ['form_id' => $formId, 'form_name' => $formName]);
-                return;
-            }
-
-            curl_setopt_array($ch, [
-                CURLOPT_URL => $url,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => '',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => false,
-                CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_TIMEOUT => 15,
-                // The endpoint may respond with 30x redirects; follow so we observe final status.
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_MAXREDIRS => 5,
-                CURLOPT_SSL_VERIFYPEER => true,
-            ]);
-
-            $response = curl_exec($ch);
-            $curlErr = curl_error($ch);
-            $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            $responsePreview = is_string($response) ? substr($response, 0, 1000) : '';
-
-            if (!empty($curlErr)) {
-                logger('External lead API: CURL error', [
-                    'form_id' => $formId,
-                    'form_name' => $formName,
-                    'curl_error' => $curlErr,
-                    'response_preview' => $responsePreview,
-                ]);
-                return;
-            }
-
-            if ($httpCode >= 400 || $httpCode === 0) {
-                logger('External lead API: HTTP error', [
-                    'form_id' => $formId,
-                    'form_name' => $formName,
-                    'http_code' => $httpCode,
-                    'response_preview' => $responsePreview,
-                ]);
-                return;
-            }
-
-            logger('External lead API: success', [
-                'form_id' => $formId,
-                'form_name' => $formName,
-                'http_code' => $httpCode,
-                'response_preview' => $responsePreview,
-            ]);
-        } catch (\Throwable $e) {
-            logger('External lead API: unexpected exception', [
-                'form_name' => $formName,
-                'form_id' => $formId,
-                'message' => $e->getMessage(),
-            ]);
+        if (isset($files['reports[]']) && !isset($files['reports'])) {
+            $files['reports'] = $files['reports[]'];
+            unset($files['reports[]']);
         }
+
+        return $files;
     }
 
-    /**
-     * Build the external API URL with query parameters.
-     *
-     * Rules:
-     * - For missing scalar fields: use '-'
-     * - For `company` (string array): if missing/empty => send one empty `company` param; if provided => send repeats.
-     */
-    private function buildExternalLeadApiUrl(string $endpoint, Request $request, string $formName): string
+    private function describeFiles(array $files): array
     {
-        $scalarKeys = [
-            'first_name',
-            'last_name',
-            'email',
-            'Job_Position',
-            'Interested',
-            'Subject',
-            'Message',
-            'source',
-            'Download_Resource',
-            'Commit_Date',
-            'Commit_Time',
-            'Commit_Zone',
-            'phone',
-            'job_title',
-            'website',
-            'Interested_Products',
-            'Interested_Marketing_Support_Service',
-            'Interested_Technical_Support_Service',
-        ];
+        $described = [];
 
-        $arrayKeys = ['company'];
-
-        $pairs = [];
-
-        foreach ($scalarKeys as $key) {
-            $pairs[] = [$key, $this->scalarValueOrDefault($request, $key, $formName)];
+        foreach ($files as $key => $value) {
+            $described[$key] = $this->describeSingleFileValue($value);
         }
 
-        foreach ($arrayKeys as $key) {
-            foreach ($this->stringArrayValueOrEmpty($request, $key) as $item) {
-                $pairs[] = [$key, $item];
-            }
-        }
-
-        $queryParts = [];
-        foreach ($pairs as [$key, $value]) {
-            // `urlencode` uses `+` for spaces, matching your sample curl query encoding.
-            $queryParts[] = urlencode((string) $key) . '=' . urlencode((string) $value);
-        }
-
-        $queryString = implode('&', $queryParts);
-
-        return rtrim($endpoint, '?') . ($queryString !== '' ? '?' . $queryString : '');
+        return $described;
     }
 
-    private function scalarValueOrDash(Request $request, string $key): string
+    private function describeSingleFileValue(mixed $value): array|string|null
     {
-        // External lead API expects some TitleCase keys, while our public API uses snake_case.
-        // If the TitleCase key is missing, fall back to its snake_case counterpart.
-        $resolvedKey = $key;
-        if (!$request->exists($resolvedKey)) {
-            $alias = match ($key) {
-                'Job_Position' => 'job_title',
-                'Interested' => 'interests',
-                'Message' => 'message',
-                'Interested_Products' => 'interested_products',
-                'Interested_Marketing_Support_Service' => 'interested_marketing_support_service',
-                'Interested_Technical_Support_Service' => 'interested_technical_support_service',
-                default => null,
-            };
-
-            if ($alias && $request->exists($alias)) {
-                $resolvedKey = $alias;
-            } else {
-                return '-';
-            }
-        }
-
-        $value = $request->input($resolvedKey);
-        if ($value === null) {
-            return '-';
+        if ($value instanceof UploadedFile) {
+            return [
+                'kind' => 'single',
+                'original_name' => $value->getClientOriginalName(),
+                'mime' => $value->getMimeType(),
+                'size' => $value->getSize(),
+            ];
         }
 
         if (is_array($value)) {
-            // Client sent an unexpected type for a scalar field.
-            // Keep behavior predictable: treat as missing.
-            return '-';
-        }
-
-        return (string) $value;
-    }
-
-    private function scalarValueOrDefault(Request $request, string $key, string $formName): string
-    {
-        if ($key === 'source') {
-            if (!$request->exists('source')) {
-                // Missing fields should follow the "use '-'" rule.
-                return '-';
-            }
-
-            $value = $request->input('source');
-            if ($value === null) {
-                return $this->defaultSourceByFormName($formName);
-            }
-
-            if (is_array($value)) {
-                // Unexpected type for `source`.
-                return '-';
-            }
-
-            $string = (string) $value;
-            return trim($string) === '' ? $this->defaultSourceByFormName($formName) : $string;
-        }
-
-        if ($key === 'website') {
-            $resolvedKey = 'website';
-            if (!$request->exists('website') && $request->exists('company_url')) {
-                $resolvedKey = 'company_url';
-            }
-
-            if (!$request->exists($resolvedKey)) {
-                // Missing fields should follow the "use '-'" rule.
-                return '-';
-            }
-
-            $value = $request->input($resolvedKey);
-            if ($value === null) {
-                return 'https://www.lamipak.biz/';
-            }
-
-            if (is_array($value)) {
-                return 'https://www.lamipak.biz/';
-            }
-
-            $string = (string) $value;
-            return trim($string) === '' ? 'https://www.lamipak.biz/' : $string;
-        }
-
-        return $this->scalarValueOrDash($request, $key);
-    }
-
-    private function defaultSourceByFormName(string $formName): string
-    {
-        return match ($formName) {
-            'subscription form' => 'subscription',
-            'subscription' => 'subscription',
-            'get_in_touch' => 'Technical Experts form',
-            'contact' => 'contact us form',
-            default => '-',
-        };
-    }
-
-    /**
-     * @return string[]
-     */
-    private function stringArrayValueOrEmpty(Request $request, string $key): array
-    {
-        if (!$request->exists($key)) {
-            return $key === 'company' ? [''] : [];
-        }
-
-        $value = $request->input($key);
-        if ($value === null) {
-            return $key === 'company' ? [''] : [];
-        }
-
-        if (is_array($value)) {
-            if (count($value) === 0) {
-                return $key === 'company' ? [''] : [];
-            }
-
-            $items = [];
-            foreach ($value as $v) {
-                if (is_scalar($v)) {
-                    $items[] = (string) $v;
+            return array_map(function ($item) {
+                if ($item instanceof UploadedFile) {
+                    return [
+                        'kind' => 'item',
+                        'original_name' => $item->getClientOriginalName(),
+                        'mime' => $item->getMimeType(),
+                        'size' => $item->getSize(),
+                    ];
                 }
-            }
 
-            if (count($items) === 0) {
-                return $key === 'company' ? [''] : [];
-            }
-
-            return $items;
+                return gettype($item);
+            }, $value);
         }
 
-        // Support `company` being sent as a single string.
-        if (is_scalar($value)) {
-            $string = (string) $value;
-            return $string === '' ? ($key === 'company' ? [''] : []) : [$string];
-        }
+        return is_object($value) ? get_class($value) : (is_scalar($value) ? (string) $value : gettype($value));
+    }
 
-        return [];
+    private function logUploadDebug(string $stage, array $context): void
+    {
+        Log::debug('FormSubmission upload debug: ' . $stage, $context);
     }
 
     /**
@@ -418,17 +216,18 @@ class FormSubmissionController extends Controller
 
     private function storeOneFile(UploadedFile $file, string $formName, string $companyId): string
     {
-        // Match the intent of ProtectForms middleware.
-        $allowedMimes = [
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'image/jpeg',
-            'image/png',
+        $allowedMimeMap = [
+            'application/pdf' => 'pdf',
+            'application/msword' => 'doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
         ];
 
-        $mimeType = (string) $file->getMimeType();
-        if (!in_array($mimeType, $allowedMimes, true)) {
+        $mimeType = strtolower((string) $file->getMimeType());
+        $extension = $allowedMimeMap[$mimeType] ?? null;
+
+        if ($extension === null) {
             abort(422, 'Disallowed file type');
         }
 
@@ -437,7 +236,6 @@ class FormSubmissionController extends Controller
             abort(422, 'File too large');
         }
 
-        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
         $date = date('Y/m');
 
         // Store on the `public` disk and return the storage-relative public path.
@@ -453,7 +251,12 @@ class FormSubmissionController extends Controller
 
     private function buildMailData(array $validatedData, array $formData): array
     {
-        $mailData = array_merge($validatedData, $formData);
+        $mailData = array_merge(
+            collect($validatedData)
+                ->except(['reports'])
+                ->toArray(),
+            $formData
+        );
 
         array_walk_recursive($mailData, function (&$value) {
             if (!is_string($value)) {
@@ -479,6 +282,8 @@ class FormSubmissionController extends Controller
                     'phone' => 'required|string|max:30',
                     'centre' => 'required|string|max:255',
                     'symptoms' => 'required|string|max:1000',
+                    'page_url' => 'required|url|max:2048',
+                    'referrer_url' => 'nullable|url|max:2048',
                 ];
 
             case 'international_video_call':
@@ -493,6 +298,8 @@ class FormSubmissionController extends Controller
                     'condition' => 'required|string|max:255',
                     'reports' => 'nullable|array',
                     'reports.*' => 'file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+                    'page_url' => 'required|url|max:2048',
+                    'referrer_url' => 'nullable|url|max:2048',
                 ];
 
             case 'home_blood_test':
@@ -504,6 +311,8 @@ class FormSubmissionController extends Controller
                     'date' => 'required|string|max:50',
                     'time_slot' => 'required|string|max:100',
                     'test' => 'required|string|max:255',
+                    'page_url' => 'required|url|max:2048',
+                    'referrer_url' => 'nullable|url|max:2048',
                 ];
 
             default:
